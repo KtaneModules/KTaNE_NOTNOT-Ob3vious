@@ -30,6 +30,7 @@ public class notnotScript : MonoBehaviour
 	private int ans = 0;
 	private int target = 0;
 	private Settings settings;
+	private bool TPmodify = false;
 
 	static int _moduleIdCounter = 1;
 	int _moduleID = 0;
@@ -64,7 +65,7 @@ public class notnotScript : MonoBehaviour
 			Button[i].OnInteract += ButtonPressed(i);
 			Button[i].GetComponent<Renderer>().enabled = false;
 		}
-		//GetSettings();
+        GetSettings();
 	}
 
 	// Use this for initialization
@@ -246,7 +247,7 @@ public class notnotScript : MonoBehaviour
 					}
 					else
 					{
-						Text.GetComponent<TextMesh>().text = "yay\nsolved";
+						Text.GetComponent<TextMesh>().text = "NOT NOT";
 					}
 				}
 				UpdateBar(t / 20f);
@@ -388,6 +389,8 @@ public class notnotScript : MonoBehaviour
 			{
 				if (statement[3] != 1)
 					state2 = 16;
+				else
+					state2 = 15;
 			}
 			else
 			{
@@ -432,6 +435,11 @@ public class notnotScript : MonoBehaviour
 	IEnumerator ProcessTwitchCommand(string command)
 	{
 		yield return null;
+        if (!TPmodify)
+        {
+			settings.basetime += 15000;
+			TPmodify = true;
+		}
 		command = command.ToLowerInvariant();
 		if (command == "start" && state == "dormant") { Button[Rnd.Range(0, 4)].OnInteract(); }
 		else if (state != "dormant")
@@ -459,10 +467,11 @@ public class notnotScript : MonoBehaviour
     {
 		int[] dirs = { 8, 4, 2, 1 };
 		int choose = 0;
+		yield return null;
 		if (state == "dormant")
 		{
 			Button[Rnd.Range(0, 4)].OnInteract();
-			yield return new WaitForSeconds(0.49f);
+			yield return new WaitForSeconds(0.5f);
 		}
 		while(state != "solved")
         {
@@ -470,9 +479,9 @@ public class notnotScript : MonoBehaviour
 			if (((target & dirs[choose]) != 0))
             {
 				Button[choose].OnInteract();
-				yield return new WaitForSeconds(0.49f);
+				yield return new WaitForSeconds(0.5f);
 			}
-			yield return new WaitForSeconds(0.01f);
+			yield return null;
 		}
 	}
 }

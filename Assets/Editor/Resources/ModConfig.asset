@@ -15,8 +15,7 @@ MonoBehaviour:
   title: NOT NOT
   author: Obvious
   description: "Never not not not not not not not fun!\n\nThis module is about fast-paced
-    logic evaluations. \nTP is supported, but you'll have to change the settings (time
-    is given in milliseconds). Enjoy"
-  version: 1.0
+    logic evaluations. \nTP is supported and adds 15 seconds to the timer. Enjoy"
+  version: 1.3
   outputFolder: build
   previewImage: {fileID: 2800000, guid: e8d446f944cdea240a0ac513fa168348, type: 3}
