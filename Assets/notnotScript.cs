@@ -9,8 +9,8 @@ using Newtonsoft.Json;
 
 class Settings
 {
-	public int basetime = 1250;
-	public int plustime = 250;
+	public float basetime = 2f;
+	public float plustime = .5f;
 }
 
 public class notnotScript : MonoBehaviour
@@ -27,6 +27,7 @@ public class notnotScript : MonoBehaviour
 	public Material Mat;
 
 	private string state = "dormant";
+	private bool steady = true;
 	private int ans = 0;
 	private int target = 0;
 	private Settings settings;
@@ -46,12 +47,15 @@ public class notnotScript : MonoBehaviour
 	{
 		return delegate
 		{
-			Button[pos].AddInteractionPunch();
-			ans = pos + 1;
-			if(state == "dormant")
+			if (steady)
 			{
-				state = "active";
-				StartCoroutine(Run());
+				Button[pos].AddInteractionPunch();
+				ans = pos + 1;
+				if (state == "dormant")
+				{
+					state = "active";
+					StartCoroutine(Run());
+				}
 			}
 			return false;
 		};
@@ -65,7 +69,15 @@ public class notnotScript : MonoBehaviour
 			Button[i].OnInteract += ButtonPressed(i);
 			Button[i].GetComponent<Renderer>().enabled = false;
 		}
-        GetSettings();
+		try
+		{
+			GetSettings();
+		}
+		catch
+		{
+			settings.basetime = 2f;
+			settings.plustime = .5f;
+		}
 	}
 
 	// Use this for initialization
@@ -116,7 +128,7 @@ public class notnotScript : MonoBehaviour
 				Text.GetComponent<TextMesh>().color = new Color(1f, 1f, 1f, 1f - (t / 8f));
 				Text.GetComponent<TextMesh>().text = Text.GetComponent<TextMesh>().text.Replace((hex[(int)t - 1] + "'>"), (hex[(int)t] + "'>"));
 			}
-			else if (t >= 13f)
+			else if (t >= 13f && t < 20f)
 			{
 				Text.GetComponent<TextMesh>().color = new Color(1f, 1f, 1f, (t - 13f) / 8f);
 				Text.GetComponent<TextMesh>().text = Text.GetComponent<TextMesh>().text.Replace((hex[21 - (int)t] + "'>"), (hex[20 - (int)t] + "'>"));
@@ -151,15 +163,15 @@ public class notnotScript : MonoBehaviour
 		Text.GetComponent<TextMesh>().color = new Color(1f, 1f, 1f, 1f);
 		while (stage > 0)
 		{
+			steady = true;
 			Debug.LogFormat("[NOT NOT #{0}] Statement displayed is: '{1}' at {2}. Valid are: {3}.", _moduleID, ("x " + display.ToUpperInvariant().Replace("\n"," ").Replace("  ", " ")).Replace("x ", "x").Replace("x ", "x").Replace("x", ""), gridchars[xpos + 6 * ypos], dirchars[Check(current, xpos, ypos)]);
-			t = (wordcount * settings.plustime + settings.basetime) / 20f;
+			t = wordcount * settings.plustime + settings.basetime;
 			while (t > 0f && ans == 0)
 			{
-				t -= 1f;
-				UpdateBar(20f * t / (wordcount * settings.plustime + settings.basetime));
-				yield return new WaitForSeconds(0.02f);
+				t -= Time.deltaTime;
+				UpdateBar(t / (wordcount * settings.plustime + settings.basetime));
+				yield return null;
 			}
-			
 			int[] answer = { 16, 8, 4, 2, 1 };
 			if ((answer[ans] & Check(current, xpos, ypos)) == 0)
 			{
@@ -179,21 +191,25 @@ public class notnotScript : MonoBehaviour
 			else if (ans == 4)
 				ypos++;
 			t = 0f;
-			while (t < 20f)
+			steady = false;
+			bool set = false;
+			while (t < 1f)
 			{
-				t += 1f;
-				if (t <= 8f)
+				if (t < .4f)
 				{
-					Text.GetComponent<TextMesh>().color = new Color(1f, 1f, 1f, 1f - ((t + 1f) / 8f));
-					Text.GetComponent<TextMesh>().text = Text.GetComponent<TextMesh>().text.Replace((hex[(int)t - 1] + "'>"), (hex[(int)t] + "'>"));
+					Text.GetComponent<TextMesh>().color = new Color(1f, 1f, 1f, 1f - (t * 2.5f));
+					for (int i = 0; i < hex.Length; i++)
+						Text.GetComponent<TextMesh>().text = Text.GetComponent<TextMesh>().text.Replace((hex[i] + "'>"), (hex[(int)(t * 20) + 1] + "'>"));
 				}
-				else if (t >= 13f)
+				else if (t > .6f)
 				{
-					Text.GetComponent<TextMesh>().color = new Color(1f, 1f, 1f, (t - 12f) / 8f);
-					Text.GetComponent<TextMesh>().text = Text.GetComponent<TextMesh>().text.Replace((hex[21 - (int)t] + "'>"), (hex[20 - (int)t] + "'>"));
+					Text.GetComponent<TextMesh>().color = new Color(1f, 1f, 1f, (t * 2.5f) - 1.5f);
+					for (int i = 0; i < hex.Length; i++)
+						Text.GetComponent<TextMesh>().text = Text.GetComponent<TextMesh>().text.Replace((hex[i] + "'>"), (hex[(int)((1 - t) * 20)] + "'>"));
 				}
-				if ((int)t == 10)
+				if (t >= .5f && !set)
 				{
+					set = true;
 					if (stage != 1)
 					{
 						if (then)
@@ -250,8 +266,9 @@ public class notnotScript : MonoBehaviour
 						Text.GetComponent<TextMesh>().text = "NOT NOT";
 					}
 				}
-				UpdateBar(t / 20f);
-				yield return new WaitForSeconds(0.02f);
+				UpdateBar(t);
+				yield return null;
+				t += Time.deltaTime;
 			}
 			Text.GetComponent<TextMesh>().color = new Color(1f, 1f, 1f, 1f);
 			stage--;
@@ -437,7 +454,7 @@ public class notnotScript : MonoBehaviour
 		yield return null;
         if (!TPmodify)
         {
-			settings.basetime += 15000;
+			settings.basetime += 15f;
 			TPmodify = true;
 		}
 		command = command.ToLowerInvariant();
@@ -450,6 +467,10 @@ public class notnotScript : MonoBehaviour
 				yield return "sendtochaterror Invalid command.";
 				yield break;
 			}
+            while (!steady)
+            {
+				yield return null;
+            }
 			yield return null;
 			for (int j = 0; j < validCommands.Length; j++)
 			{
@@ -465,21 +486,31 @@ public class notnotScript : MonoBehaviour
 
 	IEnumerator TwitchHandleForcedSolve()
     {
+		settings.plustime = 0f;
+		settings.basetime = 1f;
 		int[] dirs = { 8, 4, 2, 1 };
 		int choose = 0;
 		yield return null;
 		if (state == "dormant")
 		{
 			Button[Rnd.Range(0, 4)].OnInteract();
-			yield return new WaitForSeconds(0.5f);
+			yield return null;
 		}
 		while(state != "solved")
         {
-			choose = Rnd.Range(0, 4);
-			if (((target & dirs[choose]) != 0))
+			while (!steady && state != "solved")
+			{
+				yield return null;
+			}
+			yield return null;
+			List<int> set = Enumerable.Range(0, 4).ToList().Shuffle();
+            for (int i = 0; i < 4; i++)
             {
-				Button[choose].OnInteract();
-				yield return new WaitForSeconds(0.5f);
+				if (((target & dirs[i]) != 0))
+				{
+					Button[i].OnInteract();
+					yield return null;
+				}
 			}
 			yield return null;
 		}

@@ -1267,8 +1267,8 @@ MonoBehaviour:
   m_Script: {fileID: -289456416, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Settings: '{"basetime":1250, "plustime":250}'
-  SettingsPath: NotNot
+  Settings: '{"basetime":2, "plustime":.5}'
+  SettingsPath: NOTNOT
 --- !u!114 &114097489684032224
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1344,7 +1344,6 @@ MonoBehaviour:
   Audio: {fileID: 114731245387369772}
   sounds:
   - {fileID: 8300000, guid: 6e38b6499feb7634f922236cd81453a7, type: 3}
-  - {fileID: 8300000, guid: a5fab523193068d42bd6303e5dc0d110, type: 3}
   Bomb: {fileID: 114411910273081266}
   Button:
   - {fileID: 114648585630534880}
